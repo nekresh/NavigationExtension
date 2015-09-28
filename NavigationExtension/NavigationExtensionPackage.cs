@@ -15,6 +15,9 @@ using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.Win32;
+using NavigationExtension.Commands;
+using System.Collections.Generic;
+using Microsoft.VisualStudio.ComponentModelHost;
 
 namespace NavigationExtension
 {
@@ -38,6 +41,7 @@ namespace NavigationExtension
     [PackageRegistration(UseManagedResourcesOnly = true)]
     [InstalledProductRegistration("#110", "#112", "1.0", IconResourceID = 400)] // Info on this package for Help/About
     [ProvideMenuResource("Menus.ctmenu", 1)]
+    [ProvideAutoLoad(PackageGuidString)]
     [Guid(PackageGuidString)]
     [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "pkgdef, VS and vsixmanifest are valid VS terms")]
     public sealed class NavigationExtensionPackage : Package
@@ -60,14 +64,19 @@ namespace NavigationExtension
 
         #region Package Members
 
+        private CommandManager commmandManager;
+
         /// <summary>
         /// Initialization of the package; this method is called right after the package is sited, so this is the place
         /// where you can put all the initialization code that rely on services provided by VisualStudio.
         /// </summary>
         protected override void Initialize()
         {
-            GoToImplementationCommands.Initialize(this);
             base.Initialize();
+
+            var componentModel = this.GetService(typeof(SComponentModel)) as IComponentModel;
+            this.commmandManager = componentModel.GetService<CommandManager>();
+            this.commmandManager.Initialize(this);
         }
 
         #endregion

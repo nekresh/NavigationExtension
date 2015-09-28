@@ -52,11 +52,15 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="GoToImplementationCommands.cs" />
+    <Compile Include="Commands\CommandManager.cs" />
+    <Compile Include="Commands\GoToImplementationCommand.cs" />
+    <Compile Include="Commands\ICommand.cs" />
     <Compile Include="NavigationExtensionPackage.cs" />
-    <Compile Include="GoToImplementationService.cs" />
-    <Compile Include="NavigationService.cs" />
+    <Compile Include="Services\IGoToImplementationService.cs" />
+    <Compile Include="Services\Implementation\GoToImplementationService.cs" />
+    <Compile Include="Services\Implementation\NavigationService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\INavigationService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Key.snk" />
@@ -70,10 +74,8 @@
       <ResourceName>Menus.ctmenu</ResourceName>
       <SubType>Designer</SubType>
     </VSCTCompile>
-    <Content Include="index.html" />
     <Content Include="Resources\GoToImplementationCommands.png" />
     <Content Include="Resources\GoToImplementationCommandsPackage.ico" />
-    <Content Include="stylesheet.css" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="EnvDTE, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">

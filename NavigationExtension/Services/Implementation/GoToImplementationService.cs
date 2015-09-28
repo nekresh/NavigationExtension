@@ -8,17 +8,13 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace NavigationExtension
+namespace NavigationExtension.Services.Implementation
 {
-    public interface IGoToImplementationService
-    {
-        bool TryGoToImplementation(Document document, int position, CancellationToken cancellationToken);
-    }
-
     [Export(typeof(IGoToImplementationService))]
     internal sealed class GoToImplementationService : IGoToImplementationService
     {
-        [Import] public INavigationService NavigationService { get; set; }
+        [Import]
+        public Lazy<INavigationService> NavigationService { get; set; }
 
         public bool TryGoToImplementation(Document document, int position, CancellationToken cancellationToken)
         {
@@ -66,7 +62,7 @@ namespace NavigationExtension
             {
                 var targetDocument = project.Solution.GetDocument(location.SourceTree);
                 var documentId = targetDocument.Id;
-                return NavigationService.TryNavigate(project.Solution.Workspace, documentId, location.SourceSpan, cancellationToken);
+                return NavigationService.Value.TryNavigate(project.Solution.Workspace, documentId, location.SourceSpan, cancellationToken);
             }
 
             return false;

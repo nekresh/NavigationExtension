@@ -19,63 +19,42 @@ using Microsoft.VisualStudio.Text.Projection;
 using Microsoft.VisualStudio.Text;
 using System.Linq;
 using Microsoft.VisualStudio.ComponentModelHost;
+using NavigationExtension.Services;
+using System.Composition;
 
-namespace NavigationExtension
+namespace NavigationExtension.Commands
 {
     /// <summary>
     /// Command handler
     /// </summary>
-    internal sealed class GoToImplementationCommands
+    [Export(typeof(ICommand))]
+    public class GoToImplementationCommand : ICommand
     {
         /// <summary>
         /// Go to implementation command ID
         /// </summary>
         public const int cmdidGoToImplementationCommands = 0x0100;
-        
+
         /// <summary>
         /// Command menu group (command set GUID).
         /// </summary>
         public static readonly Guid CommandSet = new Guid("8d22bd8a-9d2a-4f17-ac2b-95bdab02aed7");
 
-        /// <summary>
-        /// VS Package that provides this command, not null.
-        /// </summary>
-        private readonly Package package;
+        private IServiceProvider serviceProvider;
 
-        public static void Initialize(Package package)
+        [Import]
+        public Lazy<IGoToImplementationService> GoToImplementationService { get; set; }
+
+        public void Initialize(IServiceProvider serviceProvider)
         {
-            Instance = new GoToImplementationCommands(package);
-        }
+            this.serviceProvider = serviceProvider;
 
-        public static GoToImplementationCommands Instance
-        {
-            get;
-            private set;
-        }
-
-        public GoToImplementationCommands(Package package)
-        {
-            if (package == null)
-                throw new ArgumentNullException("package");
-
-            this.package = package;
-
-            var commandService = ServiceProvider.GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
+            var commandService = serviceProvider.GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
             if (commandService != null)
             {
                 commandService.AddCommand(new OleMenuCommand(GoToImplementationExecuted,
                     new CommandID(CommandSet, cmdidGoToImplementationCommands)));
             }
-        }
-
-        private IServiceProvider ServiceProvider
-        {
-            get { return this.package; }
-        }
-
-        private IComponentModel ComponentModel
-        {
-            get { return ServiceProvider.GetService(typeof(SComponentModel)) as IComponentModel; }
         }
 
         private void GoToImplementationExecuted(object sender, EventArgs e)
@@ -95,8 +74,7 @@ namespace NavigationExtension
                     var document = getDocument(sourceText);
                     if (document != null)
                     {
-                        var goToImplementationService = this.ComponentModel.GetService<IGoToImplementationService>();
-                        if (goToImplementationService != null && goToImplementationService.TryGoToImplementation(document, caretPos.Value, CancellationToken.None))
+                        if (GoToImplementationService.Value.TryGoToImplementation(document, caretPos.Value, CancellationToken.None))
                         {
                             return;
                         }
@@ -162,7 +140,7 @@ namespace NavigationExtension
 
         private IVsTextView GetActiveTextView()
         {
-            var selection = ServiceProvider.GetService(typeof(IVsMonitorSelection)) as IVsMonitorSelection;
+            var selection = this.serviceProvider.GetService(typeof(IVsMonitorSelection)) as IVsMonitorSelection;
             object frameObj = null;
 
             ErrorHandler.ThrowOnFailure(selection.GetCurrentElementValue((uint)VSConstants.VSSELELEMID.SEID_DocumentFrame, out frameObj));

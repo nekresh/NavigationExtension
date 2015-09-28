@@ -14,20 +14,17 @@ using Microsoft.VisualStudio.TextManager.Interop;
 using TextSpan = Microsoft.CodeAnalysis.Text.TextSpan;
 using VsTextSpan = Microsoft.VisualStudio.TextManager.Interop.TextSpan;
 
-namespace NavigationExtension
+namespace NavigationExtension.Services.Implementation
 {
-    public interface INavigationService
-    {
-        bool TryNavigate(Workspace workspace, DocumentId documentId, TextSpan span, CancellationToken cancellationToken);
-    }
-
     [Export(typeof(INavigationService))]
     internal sealed class NavigationService : INavigationService
     {
-        [Import] public SVsServiceProvider ServiceProvider { get; set; }
-        [Import] public IVsEditorAdaptersFactoryService EditorAdaptersFactoryService { get; set; }
-        
-        public  bool TryNavigate(Workspace workspace, DocumentId documentId, TextSpan span, CancellationToken cancellationToken)
+        [Import]
+        public SVsServiceProvider ServiceProvider { get; set; }
+        [Import]
+        public IVsEditorAdaptersFactoryService EditorAdaptersFactoryService { get; set; }
+
+        public bool TryNavigate(Workspace workspace, DocumentId documentId, TextSpan span, CancellationToken cancellationToken)
         {
             // Ensure that the document is open in the Editor or the navigation will not be possible
             workspace.OpenDocument(documentId);
